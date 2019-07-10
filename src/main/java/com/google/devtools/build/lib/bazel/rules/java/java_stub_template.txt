@@ -351,10 +351,19 @@ if [ -z "$CLASSPATH_LIMIT" ]; then
   is_windows && CLASSPATH_LIMIT=7000 || CLASSPATH_LIMIT=120000
 fi
 
+JARBIN="%jarbin%"
+PERCENTAGE_LITERAL="%"
+JARBIN_LITERAL="${PERCENTAGE_LITERAL}jarbin${PERCENTAGE_LITERAL}"
+# if jarbin is evaluated to empty string or not substituted fallback to previous behavior
+# for backwards compatibility
+if [ -z "$JARBIN" ] || [ "$JARBIN" == "$JARBIN_LITERAL" ] ; then
+  JARBIN="local_jdk/bin/jar"
+fi
+
 if is_windows && (("${#CLASSPATH}" > ${CLASSPATH_LIMIT} )); then
-  create_and_run_classpath_jar "local_jdk/bin/jar.exe"
+  create_and_run_classpath_jar "${JARBIN}.exe"
 elif (("${#CLASSPATH}" > ${CLASSPATH_LIMIT})); then
-  create_and_run_classpath_jar "local_jdk/bin/jar"
+  create_and_run_classpath_jar "$JARBIN"
 else
   exec $JAVABIN -classpath $CLASSPATH "${ARGS[@]}"
 fi
